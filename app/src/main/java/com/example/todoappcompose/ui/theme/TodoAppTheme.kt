@@ -1,4 +1,5 @@
-package com.example.todoappcompose.ui.theme
+// src/main/java/com/example.todoappcompose/ui/theme/Theme.kt
+package com.example.todoappcompose.ui.theme // IMPORTANT: Ensure this package name is correct
 
 import android.app.Activity
 import android.os.Build
@@ -9,16 +10,25 @@ import androidx.compose.material3.dynamicDarkColorScheme
 import androidx.compose.material3.dynamicLightColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.SideEffect
+import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalView
+import androidx.core.view.WindowCompat
 
+// You will also need Colors.kt, where these are defined:
+// private val DarkColorScheme = darkColorScheme(...)
+// private val LightColorScheme = lightColorScheme(...)
+
+// If you have Material 3 (like in our setup), your theme might look like this:
 private val DarkColorScheme = darkColorScheme(
-    primary = Purple80,
+    primary = Purple80, // Ensure Purple80, PurpleGrey80, Pink80 are defined in Colors.kt
     secondary = PurpleGrey80,
     tertiary = Pink80
 )
 
 private val LightColorScheme = lightColorScheme(
-    primary = Purple40,
+    primary = Purple40, // Ensure Purple40, PurpleGrey40, Pink40 are defined in Colors.kt
     secondary = PurpleGrey40,
     tertiary = Pink40
 
@@ -34,7 +44,7 @@ private val LightColorScheme = lightColorScheme(
 )
 
 @Composable
-fun TodoAppComposeTheme(
+fun TodoAppTheme( // This is the composable that MainActivity is trying to find
     darkTheme: Boolean = isSystemInDarkTheme(),
     // Dynamic color is available on Android 12+
     dynamicColor: Boolean = true,
@@ -49,10 +59,18 @@ fun TodoAppComposeTheme(
         darkTheme -> DarkColorScheme
         else -> LightColorScheme
     }
+    val view = LocalView.current
+    if (!view.isInEditMode) {
+        SideEffect {
+            val window = (view.context as Activity).window
+            window.statusBarColor = colorScheme.primary.toArgb()
+            WindowCompat.getInsetsController(window, view).isAppearanceLightStatusBars = darkTheme
+        }
+    }
 
     MaterialTheme(
         colorScheme = colorScheme,
-        typography = Typography,
+        typography = Typography, // Ensure Typography is defined in Type.kt
         content = content
     )
 }

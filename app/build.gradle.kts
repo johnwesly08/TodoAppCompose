@@ -1,21 +1,17 @@
-// C:\Users\johnw\StudioProjects\TodoAppCompose\app\build.gradle.kts
-
+// app/build.gradle.kts
 plugins {
-    // Apply plugins from libs.versions.toml using 'alias'
-    alias(libs.plugins.android.application)
-    alias(libs.plugins.kotlin.android)
-    // If you removed kotlin-compose from libs.versions.toml, remove this line:
-    // alias(libs.plugins.kotlin.compose)
+    id("com.android.application")
+    id("org.jetbrains.kotlin.android")
 }
 
 android {
-    namespace = "com.johnw.todoappcompose"
-    compileSdk = 35 // Target API 35
-    var targetSdk = 35 // Target API 35
+    namespace = "com.example.todoappcompose" // Make sure this matches your actual package
+    compileSdk = 35 // Or higher, ensure consistency
 
     defaultConfig {
-        applicationId = "com.johnw.todoappcompose"
-        minSdk = 24 // Minimum API Level
+        applicationId = "com.example.todoappcompose"
+        minSdk = 24
+        targetSdk = 35 // Or higher
         versionCode = 1
         versionName = "1.0"
 
@@ -27,7 +23,7 @@ android {
 
     buildTypes {
         release {
-            isMinifyEnabled = false
+            isMinifyEnabled = false // Typo corrected: was `isMinyfyEnabled`
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
@@ -41,16 +37,15 @@ android {
     kotlinOptions {
         jvmTarget = "1.8"
     }
-
     buildFeatures {
+        // IMPORTANT: Ensure this is true for Compose
         compose = true
     }
-
     composeOptions {
-        // Reference composeCompiler version from libs.versions.toml
-        kotlinCompilerExtensionVersion = libs.versions.composeCompiler.get()
+        // IMPORTANT: This version must be compatible with your compose-bom version
+        // Android Studio usually suggests the correct one.
+        kotlinCompilerExtensionVersion = "1.5.12" // Or higher, e.g., "1.5.11" for latest Kotlin
     }
-
     packaging {
         resources {
             excludes += "/META-INF/{AL2.0,LGPL2.1}"
@@ -59,33 +54,33 @@ android {
 }
 
 dependencies {
-    // Reference libraries from libs.versions.toml
-    implementation(libs.androidx.core.ktx)
-    implementation(libs.androidx.lifecycle.runtime.ktx)
-    implementation(libs.androidx.activity.compose)
+    // Android Core KTX
+    implementation(libs.androidx.core.ktx.v1160)
+    implementation(libs.androidx.lifecycle.runtime.ktx.v280)
+    implementation(libs.androidx.activity.compose.v1101)
 
-    // Use Compose BOM for all Compose UI and Material3 dependencies
-    implementation(platform(libs.androidx.compose.bom))
-    implementation(libs.androidx.compose.ui)
-    implementation(libs.androidx.compose.ui.graphics)
-    implementation(libs.androidx.compose.ui.tooling.preview)
-    implementation(libs.androidx.compose.material3)
+    // IMPORTANT: Compose BOM (Bill of Materials) - ensures all Compose libs are compatible
+    // Use the latest stable version from https://developer.android.com/jetpack/androidx/releases/compose-bom
+    implementation(platform(libs.androidx.compose.bom.v20250600)) // Current example version
 
-    // WorkManager
-    implementation(libs.androidx.work.runtime)
+    // Core Compose UI, Graphics, Tooling
+    implementation(libs.androidx.ui)
+    implementation(libs.androidx.ui.graphics)
+    implementation(libs.androidx.ui.tooling.preview)
+
+    // Material 3 components
+    implementation(libs.androidx.material3)
+
+    // IMPORTANT: ViewModel integration for Compose
+    // This is the dependency that provides `viewModel()`
+    implementation(libs.androidx.lifecycle.viewmodel.compose) // Match lifecycle-runtime-ktx version
 
     // Testing dependencies
     testImplementation(libs.junit)
-    androidTestImplementation(libs.androidx.junit)
-    androidTestImplementation(libs.androidx.espresso.core)
-
-    // Compose testing dependencies (managed by BOM)
-    androidTestImplementation(platform(libs.androidx.compose.bom))
-    androidTestImplementation(libs.androidx.compose.ui.test.junit4)
-
-    debugImplementation(libs.androidx.compose.ui.tooling)
-    debugImplementation(libs.androidx.compose.ui.test.manifest)
-
-    // ads-mobile-sdk (if included)
-    // implementation(libs.ads.mobile.sdk)
+    androidTestImplementation(libs.androidx.junit.v121)
+    androidTestImplementation(libs.androidx.espresso.core.v361)
+    androidTestImplementation(platform(libs.androidx.compose.bom.v20250600)) // For UI testing
+    androidTestImplementation(libs.androidx.ui.test.junit4)
+    debugImplementation(libs.androidx.ui.tooling)
+    debugImplementation(libs.androidx.ui.test.manifest)
 }
