@@ -1,57 +1,47 @@
-package com.yourdomain.todoappcompose
+package com.example.todoappcompose
 
-import ads_mobile_sdk.h6
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.compose.foundation.layout.*
-import androidx.compose.material.*
-import androidx.compose.material3.Button
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedTextField
+import androidx.activity.enableEdgeToEdge
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.unit.dp
+import androidx.compose.ui.tooling.preview.Preview
+import com.example.todoappcompose.ui.theme.TodoAppComposeTheme
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        enableEdgeToEdge()
         setContent {
-            TodoAppUI()
+            TodoAppComposeTheme {
+                Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
+                    Greeting(
+                        name = "Android",
+                        modifier = Modifier.padding(innerPadding)
+                    )
+                }
+            }
         }
     }
 }
 
 @Composable
-fun TodoAppUI() {
-    var task by remember { mutableStateOf("") }
-    val taskList = remember { mutableStateListOf<String>() }
+fun Greeting(name: String, modifier: Modifier = Modifier) {
+    Text(
+        text = "Hello $name! there",
+        modifier = modifier
+    )
+}
 
-    Column(modifier = Modifier.padding(16.dp)) {
-        OutlinedTextField(
-            value = task,
-            onValueChange = { task = it },
-            label = { Text("Enter task") },
-            modifier = Modifier.fillMaxWidth()
-        )
-        Spacer(modifier = Modifier.height(8.dp))
-        Button(
-            onClick = {
-                if (task.isNotBlank()) {
-                    taskList.add(task)
-                    task = ""
-                }
-            },
-            modifier = Modifier.fillMaxWidth()
-        ) {
-            Text("Add Task")
-        }
-        Spacer(modifier = Modifier.height(16.dp))
-        Text("Tasks:", style = MaterialTheme.typography.h6)
-        Spacer(modifier = Modifier.height(8.dp))
-        for (t in taskList) {
-            Text("- $t")
-        }
+@Preview(showBackground = true)
+@Composable
+fun GreetingPreview() {
+    TodoAppComposeTheme {
+        Greeting("Android")
     }
 }
