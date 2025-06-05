@@ -1,34 +1,65 @@
+# C:\Users\johnw\StudioProjects\TodoAppCompose\gradle\libs.versions.toml
+
 [versions]
-compose = "1.5.3"
-material3 = "1.1.1"
-activityCompose = "1.7.2"
-lifecycleRuntimeKtx = "2.6.1"
-coreKtx = "1.10.1"
+# Android Gradle Plugin (AGP) - MUST be compatible with compileSdk 35
+# Using 8.5.0 as a stable version that should support API 35 (verify latest stable on official docs)
+agp = "8.5.0"
+
+# Kotlin Gradle Plugin - Matches composeCompiler version
+kotlin = "1.9.23"
+
+# Jetpack Compose Bill of Materials (BOM) version - Ensures all Compose libraries are compatible
+composeBom = "2024.06.00"
+
+# Compose Compiler Extension Version - MUST match the Kotlin version (1.9.23 -> 1.5.11)
+composeCompiler = "1.5.11"
+
+# Latest stable versions for core AndroidX libraries
+coreKtx = "1.13.1"
+lifecycleRuntimeKtx = "2.8.1"
+activityCompose = "1.9.0"
+
+# WorkManager (if you still need it and version 2.10.0 specifically requires API 35)
+workRuntime = "2.10.0"
+
+# Testing dependencies
 junit = "4.13.2"
 espressoCore = "3.5.1"
 androidxJunit = "1.1.5"
-adsMobileSdk = "0.16.0-alpha01"
+
+# If you kept ads-mobile-sdk, ensure it's a stable version if possible
+# adsMobileSdk = "X.Y.Z" # Use a stable version if available, or remove if not actively used
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
 androidx-lifecycle-runtime-ktx = { group = "androidx.lifecycle", name = "lifecycle-runtime-ktx", version.ref = "lifecycleRuntimeKtx" }
 androidx-activity-compose = { group = "androidx.activity", name = "activity-compose", version.ref = "activityCompose" }
 
-androidx-compose-ui = { group = "androidx.compose.ui", name = "ui", version.ref = "compose" }
-androidx-compose-ui-graphics = { group = "androidx.compose.ui", name = "ui-graphics", version.ref = "compose" }
-androidx-compose-ui-tooling-preview = { group = "androidx.compose.ui", name = "ui-tooling-preview", version.ref = "compose" }
-androidx-compose-ui-tooling = { group = "androidx.compose.ui", name = "ui-tooling", version.ref = "compose" }
-androidx-compose-ui-test-junit4 = { group = "androidx.compose.ui", name = "ui-test-junit4", version.ref = "compose" }
-androidx-compose-ui-test-manifest = { group = "androidx.compose.ui", name = "ui-test-manifest", version.ref = "compose" }
+# Compose BOM and individual Compose libraries (versions managed by BOM)
+androidx-compose-bom = { group = "androidx.compose", name = "compose-bom", version.ref = "composeBom" }
+androidx-compose-ui = { group = "androidx.compose.ui", name = "ui" }
+androidx-compose-ui-graphics = { group = "androidx.compose.ui", name = "ui-graphics" }
+androidx-compose-ui-tooling-preview = { group = "androidx.compose.ui", name = "ui-tooling-preview" }
+androidx-compose-material3 = { group = "androidx.compose.material3", name = "material3" }
 
-androidx-material3 = { group = "androidx.compose.material3", name = "material3", version.ref = "material3" }
+# WorkManager
+androidx-work-runtime = { group = "androidx.work", name = "work-runtime", version.ref = "workRuntime" }
 
+# Testing dependencies
 junit = { group = "junit", name = "junit", version.ref = "junit" }
 androidx-junit = { group = "androidx.test.ext", name = "junit", version.ref = "androidxJunit" }
 androidx-espresso-core = { group = "androidx.test.espresso", name = "espresso-core", version.ref = "espressoCore" }
-ads-mobile-sdk = { group = "com.google.android.libraries.ads.mobile.sdk", name = "ads-mobile-sdk", version.ref = "adsMobileSdk" }
+androidx-compose-ui-test-junit4 = { group = "androidx.compose.ui", name = "ui-test-junit4" }
+androidx-compose-ui-tooling = { group = "androidx.compose.ui", name = "ui-tooling" }
+androidx-compose-ui-test-manifest = { group = "androidx.compose.ui", name = "ui-test-manifest" }
+
+# ads-mobile-sdk (if included)
+# ads-mobile-sdk = { group = "com.google.android.libraries.ads.mobile.sdk", name = "ads-mobile-sdk", version.ref = "adsMobileSdk" }
 
 [plugins]
-android-application = { id = "com.android.application", version = "8.2.0" }
-kotlin-android = { id = "org.jetbrains.kotlin.android", version = "1.9.0" }
-kotlin-compose = { id = "org.jetbrains.kotlin.plugin.compose", version = "1.5.3" }
+# Reference versions from the [versions] section
+android-application = { id = "com.android.application", version.ref = "agp" }
+kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
+# You typically DO NOT need kotlin-compose plugin explicitly with recent AGP and Compose Compiler Extension setup
+# Remove this line unless you have a specific reason for it.
+# kotlin-compose = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "composeCompiler" }

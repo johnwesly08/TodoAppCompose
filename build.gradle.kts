@@ -2,30 +2,24 @@
 
 buildscript {
     repositories {
-        google() // This is for plugins used in this buildscript block itself
+        google()
         mavenCentral()
     }
     dependencies {
-        // Use a recent stable version of the Android Gradle Plugin
-        classpath("com.android.tools.build:gradle:8.3.1")
-        // Use a recent stable version of the Kotlin Gradle Plugin
-        classpath("org.jetbrains.kotlin:kotlin-gradle-plugin:1.9.23")
+        // --- THIS IS THE CRITICAL LINE TO CHECK ---
+        // The Android Gradle Plugin (AGP) classpath dependency MUST be a direct string.
+        // Use the 'agp' version from your libs.versions.toml for consistency.
+        classpath("com.android.tools.build:gradle:${libs.versions.agp.get()}") // Correct way to use version catalog here
+
+        // The Kotlin Gradle Plugin classpath dependency should also be a direct string.
+        classpath("org.jetbrains.kotlin:kotlin-gradle-plugin:${libs.versions.kotlin.get()}")
     }
 }
 
 plugins {
-    // Apply plugins here, but set `apply false` as they are applied to sub-modules
-    id("com.android.application") version "8.3.1" apply false
-    id("com.android.library") version "8.3.1" apply false
-    id("org.jetbrains.kotlin.android") version "1.9.23" apply false
+    // These lines are correct for applying plugins via version catalogs
+    alias(libs.plugins.android.application) apply false
+    alias(libs.plugins.kotlin.android) apply false
+    // If you removed kotlin-compose from libs.versions.toml, remove this line:
+    // alias(libs.plugins.kotlin.compose) apply false
 }
-
-// REMOVE THE FOLLOWING BLOCK COMPLETELY:
-/*
-allprojects {
-    repositories {
-        google()
-        mavenCentral()
-    }
-}
-*/

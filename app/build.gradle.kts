@@ -1,23 +1,21 @@
 // C:\Users\johnw\StudioProjects\TodoAppCompose\app\build.gradle.kts
 
 plugins {
-    id("com.android.application")
-    id("org.jetbrains.kotlin.android")
-    // Note: You typically *don't* explicitly apply 'org.jetbrains.kotlin.plugin.compose' here.
-    // The `compose = true` in the `android` block, along with the `kotlinCompilerExtensionVersion`,
-    // tells the Android Gradle Plugin to handle the Compose compiler setup.
+    // Apply plugins from libs.versions.toml using 'alias'
+    alias(libs.plugins.android.application)
+    alias(libs.plugins.kotlin.android)
+    // If you removed kotlin-compose from libs.versions.toml, remove this line:
+    // alias(libs.plugins.kotlin.compose)
 }
 
 android {
-    // Set your application's unique package name
     namespace = "com.johnw.todoappcompose"
-    // Compile against the latest stable Android SDK
-    compileSdk = 34 // Android 14
+    compileSdk = 35 // Target API 35
+    var targetSdk = 35 // Target API 35
 
     defaultConfig {
         applicationId = "com.johnw.todoappcompose"
-        minSdk = 24 // Minimum API level your app supports (e.g., Android 7.0)
-        targetSdk = 34 // Target API level for your app
+        minSdk = 24 // Minimum API Level
         versionCode = 1
         versionName = "1.0"
 
@@ -29,7 +27,7 @@ android {
 
     buildTypes {
         release {
-            isMinifyEnabled = false // Set to true for production releases
+            isMinifyEnabled = false
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
@@ -44,17 +42,13 @@ android {
         jvmTarget = "1.8"
     }
 
-    // Enable Jetpack Compose features
     buildFeatures {
         compose = true
     }
 
-    // Configure Compose compiler options
     composeOptions {
-        // IMPORTANT: This version MUST match the Kotlin version used in your project-level build.gradle.kts
-        // For Kotlin 1.9.23, the compatible Compose Compiler Extension version is 1.5.11 (as of late 2024 / early 2025).
-        // ALWAYS check the official compatibility map: https://developer.android.com/jetpack/compose/bom/mapping
-        kotlinCompilerExtensionVersion = "1.5.11"
+        // Reference composeCompiler version from libs.versions.toml
+        kotlinCompilerExtensionVersion = libs.versions.composeCompiler.get()
     }
 
     packaging {
@@ -65,35 +59,33 @@ android {
 }
 
 dependencies {
-    // Core KTX provides extensions for Kotlin
-    implementation("androidx.core:core-ktx:1.13.1")
-    // Lifecycle components for Compose
-    implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.8.1")
-    // Activity integration for Compose
-    implementation("androidx.activity:activity-compose:1.9.0")
+    // Reference libraries from libs.versions.toml
+    implementation(libs.androidx.core.ktx)
+    implementation(libs.androidx.lifecycle.runtime.ktx)
+    implementation(libs.androidx.activity.compose)
 
-    // Use the Compose Bill of Materials (BOM) to manage Compose library versions.
-    // This ensures all Compose libraries use compatible versions.
-    implementation(platform("androidx.compose:compose-bom:2024.06.00")) // Using the latest stable BOM (as of June 2025)
+    // Use Compose BOM for all Compose UI and Material3 dependencies
+    implementation(platform(libs.androidx.compose.bom))
+    implementation(libs.androidx.compose.ui)
+    implementation(libs.androidx.compose.ui.graphics)
+    implementation(libs.androidx.compose.ui.tooling.preview)
+    implementation(libs.androidx.compose.material3)
 
-    // Declare Compose UI and Material3 dependencies without specifying versions
-    // as they are managed by the BOM.
-    implementation("androidx.compose.ui:ui")
-    implementation("androidx.compose.ui:ui-graphics")
-    implementation("androidx.compose.ui:ui-tooling-preview")
-    implementation("androidx.compose.material3:material3")
-    implementation(libs.ads.mobile.sdk)
+    // WorkManager
+    implementation(libs.androidx.work.runtime)
 
     // Testing dependencies
-    testImplementation("junit:junit:4.13.2")
-    androidTestImplementation("androidx.test.ext:junit:1.1.5")
-    androidTestImplementation("androidx.test.espresso:espresso-core:3.5.1")
+    testImplementation(libs.junit)
+    androidTestImplementation(libs.androidx.junit)
+    androidTestImplementation(libs.androidx.espresso.core)
 
-    // Compose testing dependencies (also managed by BOM)
-    androidTestImplementation(platform("androidx.compose:compose-bom:2024.06.00"))
-    androidTestImplementation("androidx.compose.ui:ui-test-junit4")
+    // Compose testing dependencies (managed by BOM)
+    androidTestImplementation(platform(libs.androidx.compose.bom))
+    androidTestImplementation(libs.androidx.compose.ui.test.junit4)
 
-    // Debugging and tooling dependencies for Compose
-    debugImplementation("androidx.compose.ui:ui-tooling")
-    debugImplementation("androidx.compose.ui:ui-test-manifest")
+    debugImplementation(libs.androidx.compose.ui.tooling)
+    debugImplementation(libs.androidx.compose.ui.test.manifest)
+
+    // ads-mobile-sdk (if included)
+    // implementation(libs.ads.mobile.sdk)
 }
