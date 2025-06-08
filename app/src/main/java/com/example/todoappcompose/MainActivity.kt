@@ -1,4 +1,5 @@
-package com.example.todoappcompose // Your actual package name
+// src/main/java/com/example.todoappcompose/MainActivity.kt
+package com.example.todoappcompose
 
 import android.os.Bundle
 import androidx.activity.ComponentActivity
@@ -6,6 +7,8 @@ import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.lazy.LazyColumn // Import LazyColumn
+import androidx.compose.foundation.lazy.items // Import items for LazyColumn
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -19,6 +22,7 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -33,7 +37,6 @@ class MainActivity : ComponentActivity() {
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
                 ) {
-                    // Pass the ViewModel to our Composable
                     TodoAppScreen()
                 }
             }
@@ -44,8 +47,6 @@ class MainActivity : ComponentActivity() {
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun TodoAppScreen(
-    // ViewModel is provided by the AndroidX lifecycle-viewmodel-compose library
-    // The viewModel() function ensures it's correctly scoped and retained across config changes.
     todoViewModel: TodoViewModel = viewModel()
 ) {
     Scaffold(
@@ -60,34 +61,45 @@ fun TodoAppScreen(
         },
         floatingActionButton = {
             FloatingActionButton(onClick = {
-                // Call the addTodo function from the ViewModel
-                todoViewModel.addTodo("New Todo from FAB Click", "Description from FAB")
+                // For testing, let's keep adding dummy data.
+                // Later, this will open a dialog to add a real todo.
+                todoViewModel.addTodo("New Dummy Todo", "Added from FAB")
             }) {
                 Icon(Icons.Filled.Add, "Add new todo")
             }
         }
     ) { paddingValues ->
+        // This is the main content area of our app
         Surface(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(paddingValues),
-            color = MaterialTheme.colorScheme.surface
+                .padding(paddingValues), // Apply padding from Scaffold
+            color = MaterialTheme.colorScheme.background // Use background color for the list area
         ) {
-            // Display the current number of todos
-            // todoViewModel.todos is automatically observed by Compose
-            Column(modifier = Modifier.padding(16.dp)) {
-                Text(
-                    text = "Total Todos: ${todoViewModel.todos.size}",
-                    style = MaterialTheme.typography.headlineMedium,
-                    color = MaterialTheme.colorScheme.onSurface
-                )
-                // For now, let's just list the titles of the dummy todos
-                todoViewModel.todos.forEach { todo ->
-                    Text(
-                        text = "- ${todo.title} (Completed: ${todo.isCompleted})",
-                        modifier = Modifier.padding(vertical = 4.dp),
-                        style = MaterialTheme.typography.bodyLarge
+            // Use LazyColumn for an efficient scrollable list
+            LazyColumn(
+                modifier = Modifier.fillMaxSize()
+            ) {
+                // Use items to loop through the list of todos from our ViewModel
+                items(todoViewModel.todos) { todo ->
+                    TodoItem(
+                        todo = todo,
+                        onToggleComplete = { toggledTodo ->
+                            // When TodoItem's checkbox or row is clicked, call ViewModel function
+                            todoViewModel.toggleTodoCompletion(toggledTodo)
+                        }
                     )
+                }
+
+                // Optional: Add a header or footer to the list if needed
+                item {
+                    Column(Modifier.padding(16.dp)) {
+                        Text(
+                            text = "Total Todos: ${todoViewModel.todos.size}",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onBackground
+                        )
+                    }
                 }
             }
         }
@@ -98,8 +110,6 @@ fun TodoAppScreen(
 @Composable
 fun TodoAppPreview() {
     TodoAppTheme {
-        // In preview, we don't need a real ViewModel, but for simplicity,
-        // viewModel() can still be called, or we could pass a mock.
         TodoAppScreen()
     }
 }
