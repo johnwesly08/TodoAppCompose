@@ -63,89 +63,93 @@ class MainActivity : ComponentActivity() {
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class) // FIX 1: Capital A
 @Composable
 fun TodoScreen(dao: TaskDao) {
     var currentText by remember { mutableStateOf("") }
     val taskList by dao.getAllTasks().collectAsState(initial = emptyList())
     val coroutinesScope = rememberCoroutineScope()
 
-    Column(modifier = Modifier.padding(16.dp).fillMaxSize()) {
-
-        Text(
-            text = "My ToDo Application",
-            style = MaterialTheme.typography.headlineLarge,
-            color = MaterialTheme.colorScheme.primary
-        )
-
-        Spacer(modifier = Modifier.height(16.dp))
-
-        Row(modifier = Modifier.fillMaxWidth()) {
-            OutlinedTextField(
-                value = currentText,
-                onValueChange = { currentText = it },
-                label = { Text("What's the plan?") },
-                modifier = Modifier.weight(1f)
+    // FIX 2: Parentheses () instead of curly braces {} for the Scaffold parameter
+    Scaffold(
+        topBar = {
+            TopAppBar(
+                title = { Text("TODOs") },
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = MaterialTheme.colorScheme.primaryContainer,
+                    titleContentColor = MaterialTheme.colorScheme.primary,
+                )
             )
-
-            Spacer(modifier = Modifier.width(8.dp))
-
-            Button(
-                onClick = {
-                    if (currentText.isNotBlank()) {
-                        val textToSave = currentText
-                        coroutinesScope.launch {
-                            dao.insertTask(TodoTask(text = textToSave, isDone = false))
-                        }
-                        currentText = ""
-                    }
-                },
-                modifier = Modifier.padding(top = 8.dp)
-            ) {
-                Text("ADD")
-            }
         }
+    ) { innerPadding ->
+        Column(modifier = Modifier.padding(innerPadding).padding(16.dp).fillMaxSize()) {
 
-        Spacer(modifier = Modifier.height(24.dp))
+            Row(modifier = Modifier.fillMaxWidth()) {
+                OutlinedTextField(
+                    value = currentText,
+                    onValueChange = { currentText = it },
+                    label = { Text("What's the plan?") },
+                    modifier = Modifier.weight(1f)
+                )
 
-        LazyColumn {
-            items(taskList) { task ->
-                Card(
-                    modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp),
-                    elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
-                ) {
-                    Row(
-                        modifier = Modifier.fillMaxWidth().padding(16.dp),
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.SpaceBetween // Pushes them to opposite sides
-                    ) {
-                        Row(verticalAlignment = Alignment.CenterVertically) {
-                            Checkbox(
-                                checked = task.isDone,
-                                onCheckedChange = { isChecked ->
-                                    coroutinesScope.launch {
-                                        dao.updateTask(task.copy(isDone = isChecked))
-                                    }
-                                }
-                            )
-                            Spacer(modifier = Modifier.width(8.dp))
-                            Text(
-                                text = task.text,
-                                style = MaterialTheme.typography.bodyLarge,
-                                textDecoration = if(task.isDone) TextDecoration.LineThrough else TextDecoration.None
-                            )
-                        }
-                        // NEW: The clickable Trash Can Icon
-                        IconButton(onClick = {
-                            // NEW: Tell worker to delete from database
+                Spacer(modifier = Modifier.width(8.dp))
+
+                Button(
+                    onClick = {
+                        if (currentText.isNotBlank()) {
+                            val textToSave = currentText
                             coroutinesScope.launch {
-                                dao.deleteTask(task)
+                                dao.insertTask(TodoTask(text = textToSave, isDone = false))
                             }
-                        }) {
-                            Icon(
-                                imageVector = Icons.Default.Delete,
-                                contentDescription = "Delete Task",
-                                tint = MaterialTheme.colorScheme.error
-                            )
+                            currentText = ""
+                        }
+                    },
+                    modifier = Modifier.padding(top = 8.dp)
+                ) {
+                    Text("ADD")
+                }
+            }
+
+            Spacer(modifier = Modifier.height(24.dp))
+
+            LazyColumn {
+                items(taskList) { task ->
+                    Card(
+                        modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp),
+                        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
+                    ) {
+                        Row(
+                            modifier = Modifier.fillMaxWidth().padding(16.dp),
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.SpaceBetween
+                        ) {
+                            Row(verticalAlignment = Alignment.CenterVertically) {
+                                Checkbox(
+                                    checked = task.isDone,
+                                    onCheckedChange = { isChecked ->
+                                        coroutinesScope.launch {
+                                            dao.updateTask(task.copy(isDone = isChecked))
+                                        }
+                                    }
+                                )
+                                Spacer(modifier = Modifier.width(8.dp))
+                                Text(
+                                    text = task.text,
+                                    style = MaterialTheme.typography.bodyLarge,
+                                    textDecoration = if (task.isDone) TextDecoration.LineThrough else TextDecoration.None
+                                )
+                            }
+                            IconButton(onClick = {
+                                coroutinesScope.launch {
+                                    dao.deleteTask(task)
+                                }
+                            }) {
+                                Icon(
+                                    imageVector = Icons.Default.Delete,
+                                    contentDescription = "Delete Task",
+                                    tint = MaterialTheme.colorScheme.error
+                                )
+                            }
                         }
                     }
                 }
