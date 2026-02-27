@@ -8,6 +8,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.Info
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -15,8 +16,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import androidx.room.*
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.ViewModelProvider
+import androidx.navigation.compose.composable
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.launch
+
 
 @Entity(tableName = "task_table")
 data class TodoTask(
@@ -57,24 +61,66 @@ class MainActivity : ComponentActivity() {
 
         val dao = db.taskDao()
 
+        val factory = object : ViewModelProvider.Factory {
+            override fun <T : ViewModel> create(modelClass: Class<T>): T {
+                if (modelClass.isAssignableFrom(TodoViewModel::class.java)) {
+                    @Suppress("UNCHECKED_CAST")
+                    return TodoViewModel(dao) as T
+                }
+                throw IllegalArgumentException("Unknown ViewModel class")
+            }
+        }
+
+        val viewModel = ViewModelProvider(this, factory)[TodoViewModel::class.java]
+
         setContent {
-            TodoScreen(dao = dao)
+            com.example.todo.ui.theme.TodoTheme {
+                Surface(
+                    modifier = Modifier.fillMaxSize(),
+                    color = MaterialTheme.colorScheme.background
+                ) {
+                    val navController = androidx.navigation.compose.rememberNavController()
+
+                    androidx.navigation.compose.NavHost(
+                        navController = navController,
+                        startDestination = "home"
+                    ) {
+                        composable("home") {
+                            TodoScreen(
+                                viewModel = viewModel,
+                                onNavigateToAbout = { navController.navigate("about") }
+                            )
+                        }
+
+                        composable("about") {
+                            AboutScreen(
+                                onNavigateBack = { navController.popBackStack() }
+                            )
+                        }
+                    }
+                }
+            }
         }
     }
 }
-
 @OptIn(ExperimentalMaterial3Api::class) // FIX 1: Capital A
 @Composable
-fun TodoScreen(dao: TaskDao) {
+fun TodoScreen(viewModel: TodoViewModel, onNavigateToAbout: () -> Unit) {
     var currentText by remember { mutableStateOf("") }
-    val taskList by dao.getAllTasks().collectAsState(initial = emptyList())
-    val coroutinesScope = rememberCoroutineScope()
+    val taskList by viewModel.taskList.collectAsState()
 
-    // FIX 2: Parentheses () instead of curly braces {} for the Scaffold parameter
     Scaffold(
         topBar = {
             TopAppBar(
                 title = { Text("TODOs") },
+                actions = {
+                    IconButton(onClick = onNavigateToAbout) {
+                        Icon(
+                            imageVector = Icons.Default.Info,
+                            contentDescription = "About App"
+                        )
+                    }
+                },
                 colors = TopAppBarDefaults.topAppBarColors(
                     containerColor = MaterialTheme.colorScheme.primaryContainer,
                     titleContentColor = MaterialTheme.colorScheme.primary,
@@ -97,10 +143,7 @@ fun TodoScreen(dao: TaskDao) {
                 Button(
                     onClick = {
                         if (currentText.isNotBlank()) {
-                            val textToSave = currentText
-                            coroutinesScope.launch {
-                                dao.insertTask(TodoTask(text = textToSave, isDone = false))
-                            }
+                            viewModel.addTask(currentText)
                             currentText = ""
                         }
                     },
@@ -127,9 +170,7 @@ fun TodoScreen(dao: TaskDao) {
                                 Checkbox(
                                     checked = task.isDone,
                                     onCheckedChange = { isChecked ->
-                                        coroutinesScope.launch {
-                                            dao.updateTask(task.copy(isDone = isChecked))
-                                        }
+                                        viewModel.updateTask(task.copy(isDone = isChecked))
                                     }
                                 )
                                 Spacer(modifier = Modifier.width(8.dp))
@@ -140,9 +181,7 @@ fun TodoScreen(dao: TaskDao) {
                                 )
                             }
                             IconButton(onClick = {
-                                coroutinesScope.launch {
-                                    dao.deleteTask(task)
-                                }
+                                viewModel.deleteTask(task)
                             }) {
                                 Icon(
                                     imageVector = Icons.Default.Delete,
